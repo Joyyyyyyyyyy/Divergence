@@ -1,0 +1,105 @@
+def prob(fname,h):   #square
+    list_x = []
+    list_y = []
+    if isinstance(fname, list):
+        point_l = fname
+        N = len(fname)
+        list_x = fname[0]
+        list_y = fname[1]
+        print(type(fname))
+    else:
+        point_l = in_point(fname)
+        N = len(point_l)
+        for point in point_l:
+            list_x.append(point._x)
+            list_y.append(point._y)
+    L1 = []
+    k = 1
+    n_last = 0
+    # print(type(list_x))
+    max_x = max(list_x)
+    max_y = max(list_y)
+    field = max(max_x,max_y)
+    r=field/h
+    while k-1<= h:
+        n = 0
+        for point in point_l:
+            if (-k * r) <= list_x <= k * r and (-k * r) <= list_y <= k * r:
+                n += 1
+        p = (n - n_last) / N
+        L1.append(p)
+        k += 1
+        n_last = n
+    return L1
+
+#KL Divergence
+def DKL(d1,d2,h):
+    result = 0
+    if isinstance(d1,list) and isinstance(d2,list):
+        L1 = d1
+        L2 = d2
+    else:
+        L1 = prob(d1,h)
+        L2 = prob(d2,h)
+    n = min(len(L1) ,len(L2))   
+    for i in range(n):
+        if L1[i] != 0 and L2[i] != 0:
+            result -= L1[i]*(math.log(L2[i] / L1[i]))
+    return result
+
+#JS Divergence
+def DJS(d1,d2,h):
+    result = 0
+    M = []
+    L1 = prob(d1,h)
+    L2 = prob(d2,h)
+    n = min(len(L1) ,len(L2))   
+    for i in range(n):
+        M.append((L1[i] + L2[i]) / 2)
+    if n == len(L1):
+        for p in L2[n:]:
+            M.append(p / 2)
+    elif n == len(L2):
+        for p in L1[n:]:
+            M.append(p / 2)
+    for i in range(n):
+        if L1[i] != 0:
+            result -= L1[i]*math.log(M[i] / L1[i])
+        if L2[i] != 0:
+            result -= L2[i]*math.log(M[i] / L2[i])    
+    return result / 2
+
+#Fractional JS Divergence
+def DJSa(d1,d2,h,a):
+    assert a > -1 and a < 1, 'result is nan'
+    result = 0
+    M = []
+    L1 = prob(d1,h)
+    L2 = prob(d2,h)
+    n = min(len(L1) ,len(L2))   
+    for i in range(n):
+        M.append((L1[i] + L2[i]) / 2)
+    if n == len(L1):
+        for p in L2[n:]:
+            M.append(p / 2)
+    elif n == len(L2):
+        for p in L1[n:]:
+            M.append(p / 2)
+    gam = math.gamma(a+1)
+    #print(gam)
+    digam = digamma(1) - digamma(1 - a)
+    #print(digam)
+    for num in L1:
+        if num != 0.0:
+            result -= num * (num**(-a)) * (math.log(num) + digam)
+            #print(result,'@')
+    for num in L2:
+        if num != 0.0:
+            result -= num * (num**(-a)) * (math.log(num) + digam)
+            #print(result,'#')
+    result = result / 2
+    #print(result)
+    for num in M:
+        if num != 0.0:
+            result += num*((num**(-a))) * (math.log(num) + digam)
+    return result / gam  
