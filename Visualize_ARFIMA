@@ -1,0 +1,119 @@
+# encoding=utf-8
+from pylab import *   #支持中文
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+def multiply(list):
+    new_list=[]
+    for i in list:
+        new_list.append(i*100)
+    return new_list
+
+
+def ipt(sheetname, a=1):
+    data = pd.read_excel('dw_arfima.xlsx', index_col=0, sheet_name= None)
+    simu = a*data[sheetname]
+    simu_array=np.array(simu)
+    simu_list=simu_array.tolist()
+    # print(simu_list[0])
+    return simu_list
+
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+
+names = ['0.5','0.6','0.7','0.8','0.9','1.0']#横坐标
+x = range(len(names))
+
+# JSD
+jsd=ipt('DJS')
+
+plt.figure(figsize=(12,6))
+plt.subplot(2,2,1)
+
+plt.plot(x, jsd[0],  marker='o',mfc='w', ms=6,label=u'd=-0.5')
+plt.plot(x, jsd[1], marker='*',mfc='w', ms=6,label=u'd=-0.3')
+plt.plot(x, jsd[2], marker='D',mfc='w', ms=6,label=u'd=-0.1')
+plt.plot(x, jsd[3], marker='+',mfc='w', ms=6,label=u'd=0.1')
+plt.plot(x, jsd[4], marker='s',mfc='w', ms=6,label=u'd=0.3')
+plt.plot(x, jsd[5], marker='x',mfc='w', ms=6,label=u'd=0.5')
+plt.legend(loc='center left', bbox_to_anchor=(1,0.8))
+plt.xticks(x, names, rotation=45)
+plt.margins(0)
+plt.subplots_adjust(bottom=0.15)
+#限定纵轴的范围
+plt.ylim(0.002, 0.012)
+plt.xlabel("Coupling value W") #X轴标签题目
+plt.ylabel("JSD") #Y轴标签题目
+plt.title("Similarity test for JSD") #图标题
+
+# y=multiply([0.008010576,0.004968287,0.004303913,0.006041267,0.006150513,0.008580232])
+# y1=multiply([0.005183132,0.00611537,0.006500338,0.00526916,0.00549552,0.006976469])
+# y2=multiply([0.005412676,0.00449054,0.004649172,0.005069015,0.004178211,0.005510701])
+# y3=multiply([0.004587355,0.005748208,0.006297116,0.006792972,0.006900773,0.006599003])
+# y4=multiply([0.0081192,0.008376743,0.008382899,0.009181676,0.010038209,0.009179388])
+# y5=multiply([0.008010576,0.00670865,0.006507468,0.007297756,0.008502907,0.008733585])
+
+# JSDa
+jsda=ipt('DJSa')
+plt.subplot(2,2,2)
+
+
+plt.plot(x, jsda[0],  marker='o',mfc='w', ms=6,label=u'd=-0.5')
+plt.plot(x, jsda[1], marker='*',mfc='w', ms=6,label=u'd=-0.3')
+plt.plot(x, jsda[2], marker='D',mfc='w', ms=6,label=u'd=-0.1')
+plt.plot(x, jsda[3], marker='+',mfc='w', ms=6,label=u'd=0.1')
+plt.plot(x, jsda[4], marker='s',mfc='w', ms=6,label=u'd=0.3')
+plt.plot(x, jsda[5], marker='x',mfc='w', ms=6,label=u'd=0.5')
+plt.legend(loc='center left', bbox_to_anchor=(1,0.8))
+plt.xticks(x, names, rotation=45)
+plt.margins(0)
+plt.subplots_adjust(bottom=0.15)
+#限定纵轴的范围
+plt.ylim(-1, -0.2)
+plt.xlabel("Coupling value W") #X轴标签题目
+plt.ylabel("Fractional JSD") #Y轴标签题目
+plt.title("Similarity test for Fractional JSD") #图标题
+
+# PE JSD
+pejsd=ipt('DJS_PE')
+plt.subplot(2,2,3)
+
+plt.plot(x, pejsd[0],  marker='o',mfc='w', ms=6,label=u'd=-0.5')
+plt.plot(x, pejsd[1], marker='*',mfc='w', ms=6,label=u'd=-0.3')
+plt.plot(x, pejsd[2], marker='D',mfc='w', ms=6,label=u'd=-0.1')
+plt.plot(x, pejsd[3], marker='+',mfc='w', ms=6,label=u'd=0.1')
+plt.plot(x, pejsd[4], marker='s',mfc='w', ms=6,label=u'd=0.3')
+plt.plot(x, pejsd[5], marker='x',mfc='w', ms=6,label=u'd=0.5')
+plt.legend(loc='center left', bbox_to_anchor=(1,0.8))
+plt.xticks(x, names, rotation=45)
+plt.margins(0)
+plt.subplots_adjust(bottom=0.15)
+#限定纵轴的范围
+plt.ylim(0, 0.00125)
+plt.xlabel("Coupling value W") #X轴标签题目
+plt.ylabel("PE_JSD") #Y轴标签题目
+plt.title("Similarity test for PE_JSD") #图标题
+
+# PE JSDa
+pejsda=ipt('DJSa_PE',1)
+plt.subplot(2,2,4)
+
+plt.plot(x, pejsda[0],  marker='o',mfc='w', ms=6,label=u'd=-0.5')
+plt.plot(x, pejsda[1], marker='*',mfc='w', ms=6,label=u'd=-0.3')
+plt.plot(x, pejsda[2], marker='D',mfc='w', ms=6,label=u'd=-0.1')
+plt.plot(x, pejsda[3], marker='+',mfc='w', ms=6,label=u'd=0.1')
+plt.plot(x, pejsda[4], marker='s',mfc='w', ms=6,label=u'd=0.3')
+plt.plot(x, pejsda[5], marker='x',mfc='w', ms=6,label=u'd=0.5')
+plt.legend(loc='center left', bbox_to_anchor=(1,0.8))
+plt.xticks(x, names, rotation=45)
+plt.margins(0)
+plt.subplots_adjust(bottom=0.15)
+#限定纵轴的范围
+plt.ylim(-0.00015, 0.0001)
+plt.xlabel("Coupling value W") #X轴标签题目
+plt.ylabel("Fractional PE_JSD") #Y轴标签题目
+plt.title("Similarity test for Fractional PE_JSD") #图标题
+
+
+plt.tight_layout()
+plt.show()
