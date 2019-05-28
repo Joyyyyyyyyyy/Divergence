@@ -1,0 +1,198 @@
+#This is the JSD and Fractional JSD improved by Permutation Entropy and under the vision of Moving Window
+def quicksort(pairs):
+    if len(pairs) <= 1:
+        return pairs
+    less = []
+    greater = []
+    base = pairs.pop()
+    base_num = base._number
+    for x in pairs:
+        if x._number < base_num:
+            less.append(x)
+        else:
+            greater.append(x)
+    return quicksort(less) + [base] + quicksort(greater)
+
+def prob_pentropy(fname,n,data):
+    assert n >= 2 and n <= 7, 'result is not accurate'
+    i = 0
+    order_l = []
+    standard_l = {}
+    if isinstance(fname, list):
+        point_l = fname
+        list_x = fname[0]
+        list_y = fname[1]
+        N = len(fname)
+    else:
+        point_l = in_point(fname)
+        list_x = []
+        list_y = []
+        for point in point_l:
+            list_x.append(point._x)
+            list_y.append(point._y)
+    if data == 1:
+        lst = list_x
+    else:
+        lst = list_y
+    while i+n < len(lst):
+        pair_l = []
+        sub_lst = lst[i:i+n]
+        k = 0
+        for num in sub_lst:
+            pair_l.append(Pair(num,str(k)))
+            k += 1
+        pair_l = quicksort(pair_l)
+        order_str = ''
+        for pair in pair_l:
+            order_str += pair._index
+        order_l.append(order_str)
+        i += 1
+    #print(order_l)   
+    permutations = list(itertools.permutations(range(n)))
+    for lst in permutations:
+        std =''
+        for num in lst:
+            std += str(num)
+        standard_l[std] = 0
+    #print('@',standard_l)
+    for num in order_l:
+        for std in standard_l:
+            if num == std:
+                standard_l[std] += 1
+    #print('#',standard_l)
+    for num in standard_l.keys():
+        standard_l[num] = standard_l[num] / len(order_l)
+    return standard_l
+
+def window_prob_pentropy(fname,i,n,data,lg): #data=0 or 1->x or y,lg->window length
+    assert n >= 2 and n <= 7, 'result is not accurate'
+    point_l = in_point(fname)[i:lg+i]
+    i = 0
+    order_l = []
+    standard_l = {}
+    list_x = []
+    list_y = []
+    for point in point_l:
+        list_x.append(point._x)
+        list_y.append(point._y) 
+    if data == 1:
+        lst = list_x
+    else:
+        lst = list_y
+    while i+n < len(lst):
+        pair_l = []
+        sub_lst = lst[i:i+n]
+        k = 0
+        for num in sub_lst:
+            pair_l.append(Pair(num,str(k)))
+            k += 1
+        pair_l = quicksort(pair_l)
+        order_str = ''
+        for pair in pair_l:
+            order_str += pair._index
+        order_l.append(order_str)
+        i += 1
+    #print(order_l)   
+    permutations = list(itertools.permutations(range(n)))
+    for lst in permutations:
+        std =''
+        for num in lst:
+            std += str(num)
+        standard_l[std] = 0
+    #print('@',standard_l)
+    for num in order_l:
+        for std in standard_l:
+            if num == std:
+                standard_l[std] += 1
+    #print('#',standard_l)
+    for num in standard_l.keys():
+        standard_l[num] = standard_l[num] / len(order_l)
+    return standard_l
+  
+    
+def DJS_PE(fname_1,fname_2,n,data):
+    d1 = prob_pentropy(fname_1,n,data)
+    d2 = prob_pentropy(fname_2,n,data)
+    M = d1.copy()
+    for num in d2.keys():
+        M[num] = (M[num] + d2[num]) / 2
+    prob_d1 = list(map(lambda k: d1[k], d1.keys()))
+    prob_d2 = list(map(lambda k: d2[k], d2.keys()))
+    prob_m = list(map(lambda k: M[k], M.keys()))
+    result = 0
+    for i in range(n):
+        if prob_d1[i] != 0:
+            result -= prob_d1[i] * math.log(prob_m[i] / prob_d1[i])
+        if prob_d2[i] != 0:
+            result -= prob_d2[i] * math.log(prob_m[i] / prob_d2[i])
+    return result / 2
+
+def DJSa_PE(d1,d2,a,n,data):
+    assert a > -1 and a < 1, 'result is nan'
+    result = 0
+    L1 = prob_pentropy(d1,n,data)
+    L2 = prob_pentropy(d2,n,data)
+    M = L1.copy()
+    for num in L2.keys():
+        M[num] = (M[num] + L2[num]) / 2
+    gam = math.gamma(a + 1)
+    # print(gam)
+    digam = digamma(1) - digamma(1 - a)
+    # print(digam)
+    prob_d1 = list(map(lambda k: d1[k], d1.keys()))
+    prob_d2 = list(map(lambda k: d2[k], d2.keys()))
+    prob_m = list(map(lambda k: M[k], M.keys()))
+    for num in prob_d1:
+        if num != 0.0:
+            result -= num * (num ** (-a)) * (math.log(num) + digam)
+            # print(result,'@')
+    for num in prob_d2:
+        if num != 0.0:
+            result -= num * (num ** (-a)) * (math.log(num) + digam)
+            # print(result,'#')
+    result = result / 2
+    # print(result)
+    for num in prob_m:
+        if num != 0.0:
+            result += num * ((num ** (-a))) * (math.log(num) + digam)
+    return result / gam
+
+def window_DJS_PE(fname_1,fname_2,n,data,lg):
+    X = []
+    Y = []
+    if isinstance(fname_1,list):
+        l = max(len(fname_1),len(fname_2))
+    else:
+        l = max(len(in_point(fname_1)),len(in_point(fname_2)))
+    for k in range(0,(l-lg), lg):
+        M = []    
+        d1 = window_prob_pentropy(fname_1, k, n, data,lg)
+        d2 = window_prob_pentropy(fname_2, k, n, data,lg)
+        M = d1
+        for num in d2.keys():
+            M[num] = (M[num] + d2[num]) / 2
+        # print(M)
+        # for i in range(0, len(M) - k): #not sure for moving window!
+        prob_d1 = list(filter(lambda x: x!=0, list(map(lambda k: d1[k],d1.keys()))))
+        prob_d2 = list(filter(lambda x: x!=0, list(map(lambda k: d2[k],d2.keys()))))
+        prob_m = list(filter(lambda x: x!=0, list(map(lambda k: M[k], M.keys()))))
+        pe_1 = -sum(prob_d1 * (numpy.log(prob_m) - numpy.log(prob_d1)))
+        pe_2 = -sum(prob_d2 * (numpy.log(prob_m) - numpy.log(prob_d2)))
+        result = 1 / 2 * (pe_1 + pe_2)
+        X.append(k)
+        Y.append(result)
+    # print(X)
+    # print(Y)
+    # y1 = []
+    # y2 = []
+    # for i in range(0,(l-lg),lg):
+    #     y1.append(0)
+    #     y2.append(1)
+    #x = np.array(x)
+    #y = np.array(y)
+    plt.plot(X,Y)
+    # plt.plot(X,y1,'--')
+    # plt.plot(X,y2,'--')
+    plt.ylabel('window_DJS_PE')
+    plt.xlabel('window')
+    plt.show()
