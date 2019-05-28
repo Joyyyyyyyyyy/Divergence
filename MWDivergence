@@ -1,0 +1,130 @@
+#This is Divergence under Moving Window Of length 100
+def window_prob(fname,h,i,lg): #square  窗口值：l==i    窗口大小：n==lg
+    point_l = in_point(fname)
+    l = point_l[i:lg+i]
+    L = []
+    k = 1
+    n_last = 0
+    list_x = []
+    list_y = []
+    for point in l:
+        list_x.append(point._x)
+        list_y.append(point._y)
+    # print(list_x)
+    # print(list_y)
+    if not list_x or not list_y:
+        L.append(0)
+    else:
+        max_x = max(list_x)
+        max_y = max(list_y)
+        field = max(max_x,max_y)
+        r = field / h
+    while k-1<= h:
+        n = 0
+        for point in l:
+            if (-k*r) <= point._x <= k*r and (-k*r)<= point._y <= k*r:
+                n += 1
+        p = (n - n_last) / lg
+        L.append(p)
+        k += 1
+        n_last = n
+    return L
+
+#JS Divergence under Moving Window Of length 100
+def window_DJS(fname_1,fname_2,h,lg):
+    x = []
+    y = []
+    l = max(len(in_point(fname_1)),len(in_point(fname_2)))
+    for num in range(0,(l-lg), lg):
+        result = 0
+        M = []
+        L1 = window_prob(fname_1,h,num,lg)
+        L2 = window_prob(fname_2,h,num,lg)
+        n = min(len(L1) ,len(L2))   
+        for i in range(n):
+            M.append((L1[i] + L2[i]) / 2)
+        if n == len(L1):
+            for p in L2[n:]:
+                M.append(p / 2)
+        elif n == len(L2):
+            for p in L1[n:]:
+                M.append(p / 2)
+        for i in range(n):
+            if L1[i] != 0:
+                result -= L1[i]*math.log(M[i] / L1[i])
+            if L2[i] != 0:
+                result -= L2[i]*math.log(M[i] / L2[i])    
+        result = result / 2
+        x.append(num)
+        y.append(result)
+    # print(x)
+    # print(y)
+    y1 = []
+    y2 = []
+    for i in range(0,(l-lg), lg):
+        y1.append(0)
+        y2.append(1)
+    #x = np.array(x)
+    #y = np.array(y)
+    plt.plot(x,y)
+    plt.plot(x,y1,'--')
+    plt.plot(x,y2,'--')
+    plt.ylabel('window_DJSa')
+    plt.xlabel('window')
+    plt.show() 
+
+#Fractional JS Divergence under Moving Window Of length 100
+def window_DJSa(fname_1, fname_2, h, a, lg):
+    assert a > -1 and a < 1, 'result is nan'
+    x = []
+    y = []
+    l = len(in_point(fname_1))
+    for k in range(0,(l-lg), lg):
+        result = 0
+        M = []
+        L1 = window_prob(fname_1,h,k,lg)
+        L2 = window_prob(fname_2,h,k,lg)
+        n = min(len(L1) ,len(L2))   
+        for i in range(n):
+            M.append((L1[i] + L2[i]) / 2)
+        if n == len(L1):
+            for p in L2[n:]:
+                M.append(p / 2)
+        elif n == len(L2):
+            for p in L1[n:]:
+                M.append(p / 2)
+        gam = math.gamma(a+1)
+        #print(gam)
+        digam = digamma(1) - digamma(1 - a)
+        #print(digam)
+        for num in L1:
+            if num != 0.0:
+                result -= num * (num**(-a)) * (math.log(num) + digam)
+                #print(result,'@')
+        for num in L2:
+            if num != 0.0:
+                result -= num * (num**(-a)) * (math.log(num) + digam)
+                #print(result,'#')
+        result = result / 2
+        #print(result)
+        for num in M:
+            if num != 0.0:
+                result += num*((num**(-a))) * (math.log(num) + digam)
+        x.append(k)
+        y.append(result / gam) 
+    # print(x)
+    # print(y)
+    y1 = []
+    y2 = []
+    for i in range(0,(l-lg), lg):
+        y1.append(0)
+        y2.append(1)
+    #x = np.array(x)
+    #y = np.array(y)
+    plt.plot(x,y)
+    plt.plot(x,y1,'--')
+    plt.plot(x,y2,'--')
+    plt.ylabel('window_DJSa')
+    plt.xlabel('window')
+    plt.show()    
+    
