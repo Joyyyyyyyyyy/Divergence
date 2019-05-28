@@ -1,0 +1,316 @@
+class MakeMatrix_DJS:
+    def inputinfor(self):
+        while True:
+            h=int(input("h "))
+            n=int(input("n "))
+            q=[]
+            d=[[] for i in range(n)]
+            for i in range(n):
+                q.append(prob(input("fname"), h))
+            # print('@', q)
+
+            for i in range(n):
+                for j in range(n):
+                    n0 = min(len(q[i]), len(q[j]))
+                    # print('@', n0)
+                    result = 0
+                    for k in range(n0):
+                        # print(q[i][k],'---',q[j][k])
+                        if q[i][k] != 0:
+                            result -= q[i][k] * math.log(((q[i][k] + q[j][k]) / 2) / q[i][k])
+                        if q[j][k] != 0:
+                            result -= q[j][k] * math.log(((q[i][k] + q[j][k]) / 2) / q[j][k])
+                    d[i].append(result / 2)
+            # return d
+            # print('@', d)
+            #         print('@', result/2)
+            #         print("--------------------")
+            #     print("--------------------")
+            # print("--------------------")
+            def set_style(name, height, bold=False):
+                style = xlwt.XFStyle()  # 初始化样式
+                font = xlwt.Font()  # 为样式创建字体
+                font.name = name
+                font.bold = bold
+                font.color_index = 4
+                font.height = height
+                style.font = font
+                return style
+
+            def write_excel():
+                # 创建工作簿
+                workbook = xlwt.Workbook(encoding='utf-8')
+                # 创建sheet
+                data_sheet = workbook.add_sheet('demo')
+
+                # 列表格式数据
+                # 定义循环下标
+                index = 0
+                for i in d:
+                    # 每一列的内容(i)
+                    for x, item in enumerate(i):
+                        # 下标(x)，单元元素(item)
+                        data_sheet.write(index, x, item, set_style('Times New Roman', 220, True))
+                    index += 1
+                # sys.exit();
+                # 保存文件
+                workbook.save('matrix_DJS.xls')
+
+            if __name__ == '__main__':
+                write_excel()
+                print('创建matrix_DJS.xlsx文件成功')
+# MakeMatrix_DJS().inputinfor()
+
+class MakeMatrix_DJSa:
+    def newyear(self):
+        while True:
+            h = int(input("h "))
+            n = int(input("n "))
+            a = float(input("a "))
+            q = []
+            d = [[] for i in range(n)]
+            for i in range(n):
+                q.append(prob(input("fname"), h))
+            # print('@', q)
+
+            for i in range(n):
+                for j in range(n):
+                    assert a > -1 and a < 1, 'result is nan'
+                    result = 0
+                    M = []
+                    n0 = min(len(q[i]), len(q[j]))
+                    for k in range(n0):
+                        M.append((q[i][k] + q[j][k]) / 2)
+                    # if n0 == len(L1):
+                    #     for p in L2[n:]:
+                    #         M.append(p / 2)
+                    # elif n == len(L2):
+                    #     for p in L1[n:]:
+                    #         M.append(p / 2)
+                    gam = math.gamma(a + 1)
+                    # print(gam)
+                    digam = digamma(1) - digamma(1 - a)
+                    # print(digam)
+                    for num in q[i]:
+                        if num != 0.0:
+                            result -= num * (num ** (-a)) * (math.log(num) + digam)
+                            # print(result,'@')
+                    for num in q[j]:
+                        if num != 0.0:
+                            result -= num * (num ** (-a)) * (math.log(num) + digam)
+                            # print(result,'#')
+                    result = result / 2
+                    # print(result)
+                    for num in M:
+                        if num != 0.0:
+                            result += num * ((num ** (-a))) * (math.log(num) + digam)
+                    d[i].append(-result / gam)
+
+            # return d
+            # print('@', d)
+            #         print('@', result/2)
+            #         print("--------------------")
+            #     print("--------------------")
+            # print("--------------------")
+            def set_style(name, height, bold=False):
+                style = xlwt.XFStyle()  # 初始化样式
+                font = xlwt.Font()  # 为样式创建字体
+                font.name = name
+                font.bold = bold
+                font.color_index = 4
+                font.height = height
+                style.font = font
+                return style
+
+            def write_excel():
+                # 创建工作簿
+                workbook = xlwt.Workbook(encoding='utf-8')
+                # 创建sheet
+                data_sheet = workbook.add_sheet('demo')
+
+                # 列表格式数据
+                # 定义循环下标
+                index = 0
+                for i in d:
+                    # 每一列的内容(i)
+                    for x, item in enumerate(i):
+                        # 下标(x)，单元元素(item)
+                        data_sheet.write(index, x, item, set_style('Times New Roman', 220, True))
+                    index += 1
+                # sys.exit();
+                # 保存文件
+                workbook.save('matrix_DJSa.xls')
+
+            if __name__ == '__main__':
+                write_excel()
+                print('创建matrix_DJSa.xlsx文件成功')
+# MakeMatrix_DJSa().newyear()
+
+
+class MakeMatrix_DJS_PE:
+    def newyear(self):
+        while True:
+            n = int(input("n "))
+            N = int(input("N "))
+            data = int(input("data "))
+            q = []
+            d = [[] for i in range(n)]
+            for i in range(n):
+                q.append(prob_pentropy(input("fname "), N, data))
+            # print('@', q)
+
+            for i in range(n):
+                for j in range(n):
+                    M = q[i]
+                    for num in q[j].keys():
+                        M[num] = (M[num] + q[j][num]) / 2
+                    # print(M)
+                    prob_d1 = list(filter(lambda x: x != 0, list(map(lambda k: q[i][k], q[i].keys()))))
+                    prob_d2 = list(filter(lambda x: x != 0, list(map(lambda k: q[j][k], q[j].keys()))))
+                    prob_m = list(filter(lambda x: x != 0, list(map(lambda k: M[k], M.keys()))))
+                    pe_1 = -sum(prob_d1 * (numpy.log(prob_m) - numpy.log(prob_d1)))
+                    pe_2 = -sum(prob_d2 * (numpy.log(prob_m) - numpy.log(prob_d2)))
+                    # pe_m = -sum(prob_m * numpy.log(prob_m))
+                    result = 1 / 2 * (pe_1 + pe_2)
+                    d[i].append(result)
+
+            # return d
+            # print('@', d)
+            #         print('@', result/2)
+            #         print("--------------------")
+            #     print("--------------------")
+            # print("--------------------")
+            def set_style(name, height, bold=False):
+                style = xlwt.XFStyle()  # 初始化样式
+                font = xlwt.Font()  # 为样式创建字体
+                font.name = name
+                font.bold = bold
+                font.color_index = 4
+                font.height = height
+                style.font = font
+                return style
+
+            def write_excel():
+                # 创建工作簿
+                workbook = xlwt.Workbook(encoding='utf-8')
+                # 创建sheet
+                data_sheet = workbook.add_sheet('demo')
+
+                # 列表格式数据
+                # 定义循环下标
+                index = 0
+                for i in d:
+                    # 每一列的内容(i)
+                    for x, item in enumerate(i):
+                        # 下标(x)，单元元素(item)
+                        data_sheet.write(index, x, item, set_style('Times New Roman', 220, True))
+                    index += 1
+                # sys.exit();
+                # 保存文件
+                workbook.save('matrix_DJS_PE.xls')
+
+            if __name__ == '__main__':
+                write_excel()
+                print('创建matrix_DJS_PE.xlsx文件成功')
+# MakeMatrix_DJS_PE().newyear()
+
+class MakeMatrix_DJSa_PE:
+    def newyear2(self):
+        while True:
+            n = int(input("n "))
+            N = int(input("N "))
+            data = int(input("data "))
+            a = float(input("a "))
+            q = []
+            d = [[] for i in range(n)]
+            mi=[]
+            ma=[]
+            for i in range(n):
+                q.append(prob_pentropy(input("fname "), N, data))
+            # print('@', q)
+
+            for i in range(n):
+                for j in range(n):
+                    assert a > -1 and a < 1, 'result is nan'
+                    result = 0
+                    M = []
+                    n0 = min(len(q[i]), len(q[j]))
+                    M = q[i]
+                    for num in q[j].keys():
+                        M[num] = (M[num] + q[j][num]) / 2
+                    # if n0 == len(L1):
+                    #     for p in L2[n:]:
+                    #         M.append(p / 2)
+                    # elif n == len(L2):
+                    #     for p in L1[n:]:
+                    #         M.append(p / 2)
+                    prob_d1 = list(filter(lambda x: x != 0, list(map(lambda k: q[i][k], q[i].keys()))))
+                    prob_d2 = list(filter(lambda x: x != 0, list(map(lambda k: q[j][k], q[j].keys()))))
+                    prob_m = list(filter(lambda x: x != 0, list(map(lambda k: M[k], M.keys()))))
+                    gam = math.gamma(a + 1)
+                    # print(gam)
+                    digam = digamma(1) - digamma(1 - a)
+                    # print(digam)
+                    for num in prob_d1:
+                        if num != 0.0:
+                            result -= num * (num ** (-a)) * (math.log(num) + digam)
+                            # print(result,'@')
+                    for num in prob_d2:
+                        if num != 0.0:
+                            result -= num * (num ** (-a)) * (math.log(num) + digam)
+                            # print(result,'#')
+                    result = result / 2
+                    # print(result)
+                    for num in prob_m:
+                        if num != 0.0:
+                            result += num * ((num ** (-a))) * (math.log(num) + digam)
+                    d[i].append(abs(result / gam))
+            for s in d:
+                mi.append(min(s))
+                ma.append(max(s))
+            mifinal=min(mi)
+            mafinal=max(ma)
+
+            for s in d:
+                for l in s:
+                    l=(l-mifinal)/(mafinal-mifinal)
+
+            # return d
+            # print('@', d)
+            #         print('@', result/2)
+            #         print("--------------------")
+            #     print("--------------------")
+            # print("--------------------")
+            def set_style(name, height, bold=False):
+                style = xlwt.XFStyle()  # 初始化样式
+                font = xlwt.Font()  # 为样式创建字体
+                font.name = name
+                font.bold = bold
+                font.color_index = 4
+                font.height = height
+                style.font = font
+                return style
+
+            def write_excel():
+                # 创建工作簿
+                workbook = xlwt.Workbook(encoding='utf-8')
+                # 创建sheet
+                data_sheet = workbook.add_sheet('demo')
+
+                # 列表格式数据
+                # 定义循环下标
+                index = 0
+                for i in d:
+                    # 每一列的内容(i)
+                    for x, item in enumerate(i):
+                        # 下标(x)，单元元素(item)
+                        data_sheet.write(index, x, item, set_style('Times New Roman', 220, True))
+                    index += 1
+                # sys.exit();
+                # 保存文件
+                workbook.save('matrix_DJSa_PE.xls')
+
+            if __name__ == '__main__':
+                write_excel()
+                print('创建matrix_DJSa_PE.xlsx文件成功')
+# MakeMatrix_DJSa_PE().newyear2()
