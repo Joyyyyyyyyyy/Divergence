@@ -1,0 +1,142 @@
+#Generating Time Series by Logistic Map
+def logistic(ini, par, lenth=5000):
+    name = '(' + str(ini) + ',' + str(par) + ')'
+    assert ini > 0 and ini < 1, 'initial value is out of range'
+    l=[]
+    l.append(ini)
+    for i in range(lenth-1):
+        nex = par*ini*(1-ini)
+        l.append(nex)
+        ini = nex
+    # npl = np.array(l)
+    # np.savetxt(name, npl)
+    return l
+
+def logistic_jsdy(ini):
+    # data=[]
+    # data.append(logistic(ini, 3.5))
+    data0 = logistic(ini, 3.50)
+    jsd=[]
+    for ele in np.arange(3.5, 4.1, 0.1):
+        # jsd.append(DJS(data0, logistic(ini, ele), 100))
+        # jsd.append(DJS_PE(data0, logistic(ini, ele), 3))
+        jsd.append(DJSa(data0, logistic(ini, ele), 100, 0.5))
+        # jsd.append(DJSa_PE(data0, logistic(ini, ele), 0.5, 3))  #改这里！！
+    return jsd
+# test = logistic(0.5, 3.6, 5000)
+# print(DJS('(0.5,3.5)','(0.5,3.6)',100))
+# print(DJS_PE('simulation1','simulation2',3))
+# print(DJSa('simulation1','simulation2',100,0.5))
+# print(DJSa_PE('simulation1','simulation2',0.5,3))
+# print(jsdy(0.5))
+# logistic(ini, 3.50)
+
+def logistic_exp():
+    jsd = []
+    for ini in np.arange(0.1, 1.1, 0.2):
+        jsd.append(logistic_jsdy(ini))
+    return jsd
+
+
+#Generating Time Series by ARFIMA Model
+import math
+import numpy as np
+import itertools
+def a(n,d):
+    x = d * math.gamma(n - d) / (math.gamma(1 - d) * math.gamma(n + 1))
+    return x
+def a1(n,d):
+    #striling推导的计算gamma函数方法
+    x = (1-(d+1)/(n+1))**(n+1/2)*math.exp(1+d)*d/((n-d)**(d+1))/math.gamma(1-d)
+    return x
+def afm(d1,W):
+    N=5000
+    np.random.seed(1)
+    mu1, sigma1, n_samples1 = 0, 0.1, N  # mean, standard deviation, size
+    mu2, sigma2, n_samples2 = 0, 0.1, N
+    w1 = np.random.normal(mu1, sigma1, n_samples1)
+    w2 = np.random.normal(mu2, sigma2, n_samples2)
+    d2=d1
+    X=[0]*N
+    Y=[0]*N
+    x = [0] * N
+    y = [0] * N
+    x[0]=w1[0]
+    y[0]=w2[0]
+    list_p=np.ones([N,2])
+    l=[]
+    list_p[0][0]=w1[0]
+    list_p[0][1]=w2[0]
+    for t in range(1,N):
+        n = 1
+        while n >= 1 and n <= t:
+            X[t] += x[t - n] * a1(n, d1)
+            # print(a1(n, d1))
+            Y[t] += y[t - n] * a1(n, d2)
+            # print('%f---%f' % (X[t], Y[t]))
+            n = n + 1
+        x[t] = W * X[t] + (1 - W) * Y[t] + w1[t]
+        y[t] = (1 - W) * X[t] + W * Y[t] + w2[t]
+        list_p[t][0] = x[t]
+        list_p[t][1] = y[t]
+        # print('%f---%f' % (x[t], y[t]))
+    l.append(x)
+    l.append(y)
+    return l
+def arfima_jsdy(d1):
+    jsd=[]
+    for i in np.arange(0.5, 1.01, 0.1):
+        # jsd.append(DJS(afm(d1, i)[0],afm(d1, i)[1], 100))
+        # jsd.append(DJS_PE(afm(d1, i)[0], afm(d1, i)[1], 3))
+        # jsd.append(DJSa(afm(d1, i)[0], afm(d1, i)[1], 100, 0.5))
+        jsd.append(DJSa_PE(afm(d1, i)[0], afm(d1, i)[1], 0.5, 3))  #改这里！！
+    return jsd
+def arfima_exp():
+    jsd=[]
+    for d1 in np.arange(-0.5, 0.7, 0.2):
+        jsd.append(arfima_jsdy(d1))
+    return jsd
+# print(exp())
+
+#Save as Excel
+import xlwt
+def set_style(name, height, bold=False):
+    style = xlwt.XFStyle()  # 初始化样式
+    font = xlwt.Font()  # 为样式创建字体
+    font.name = name
+    font.bold = bold
+    font.color_index = 4
+    font.height = height
+    style.font = font
+    return style
+
+def write_excel():
+    # 创建工作簿
+    workbook = xlwt.Workbook(encoding='utf-8')
+    # 创建sheet
+    data_sheet = workbook.add_sheet('demo')
+
+    # 列表格式数据
+    # 定义循环下标
+    index = 0
+    # for i in logistic_exp():   #这里改不同的模拟方法！！！
+    for i in arfima_exp():
+        # 每一列的内容(i)
+        for x, item in enumerate(i):
+            # 下标(x)，单元元素(item)
+            data_sheet.write(index, x, item, set_style('Times New Roman', 220, True))
+        index += 1
+    # sys.exit();
+    # 保存文件
+    # workbook.save('logistic_jsd.xls.xls')
+    # workbook.save('logistic_jsd_pe.xls.xls')
+    # workbook.save('logistic_jsda.xls.xls')
+    # workbook.save('logistic_jsda_pe.xls.xls')   #和这里！！！
+    # workbook.save('arfima_jsd.xls.xls')
+    # workbook.save('arfima_jsd_pe.xls.xls')
+    # workbook.save('arfima_jsda.xls.xls')
+    workbook.save('arfima_jsda_pe.xls.xls')   #和这里！！！
+
+if __name__ == '__main__':
+    write_excel()
+    print('创建文件成功')
